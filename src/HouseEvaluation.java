@@ -27,16 +27,9 @@ public class HouseEvaluation {
 		
 		//3. 데이터를 원하는 형식으로 바꿉니다.
 		
-		avgBySection.keySet().forEach(key->System.out.println("Key:"+key+",Value:"+avgBySection.get(key)));
 		
-		//4. 알고리즘을 돌립니다. 이 부분도 1,2와 같이 적절한 추상화 부탁드립니다.@수민이형
-		
-		
-		//5. 결과를  writeResult 아래의 포맷에 맞게 바꿉니다. 메서드 하나 만드셔서 작업해주세요.@현호형
-		//result : HashMap<ID:Integer, SalePrice:Double>
-		
-		//6. 결과를 파일로 씁니다. 주석만 해제하면됩니다.
-		//writeResult(result);
+		//4. 결과를 파일로 씁니다. 주석만 해제하면됩니다.
+		writeResult(new NaiveBayesian(avgBySection).getPredictions());
 		
 		/*
 		 * 출력을 위한 메서드로,
