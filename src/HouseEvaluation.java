@@ -13,7 +13,7 @@ public class HouseEvaluation {
 	private ArrayList<String[]> tests;
 	
 	private ArrayList<Double> salePrices;
-	private ArrayList<Double> avgBySection;
+	private HashMap<String,Double> avgBySection;
 	
 	public HouseEvaluation(){
 		
@@ -25,9 +25,12 @@ public class HouseEvaluation {
 		convertData();
 		groupByAvg();
 		
-		//3. 데이터를 원하는 형식으로 바꿉니다. 메서드 하나 만드셔서 작업해주세요.@현호형
+		//3. 데이터를 원하는 형식으로 바꿉니다.
+		
+		avgBySection.keySet().forEach(key->System.out.println("Key:"+key+",Value:"+avgBySection.get(key)));
 		
 		//4. 알고리즘을 돌립니다. 이 부분도 1,2와 같이 적절한 추상화 부탁드립니다.@수민이형
+		
 		
 		//5. 결과를  writeResult 아래의 포맷에 맞게 바꿉니다. 메서드 하나 만드셔서 작업해주세요.@현호형
 		//result : HashMap<ID:Integer, SalePrice:Double>
@@ -42,7 +45,7 @@ public class HouseEvaluation {
 		 * printTestData() : Test 데이터 모두 출력. 마찬가지로 위에 짤림.
 		 * 를 미리 작성해두었습니다.
 		 */
-		printTrainData();
+//		printTrainData();
 		
 	}
 	
@@ -50,22 +53,26 @@ public class HouseEvaluation {
 	//뉴메릭컬한 SalePrice를 카테고리컬하게 변환하기 전에 미리 빼돌려놓습니다.
 	private ArrayList<Double> saveSalePrices(){
 		salePrices = trains.stream()
-				   .map(train->Double.parseDouble(train[train.length-1]))
-				   .collect(Collectors.toCollection(ArrayList::new));
+				   		   .map(train->Double.parseDouble(train[train.length-1]))
+				   		   .collect(Collectors.toCollection(ArrayList::new));
 		return salePrices;
 	}
 	
 	//범위별로 SalePrice 그룹을 나누고 각 그룹별 평균을 구합니다.
-	private ArrayList<Double> groupByAvg(){
+	private HashMap<String,Double> groupByAvg(){
 		ArrayList<Predicate<Double>> ranges = DomainConvertor.getInstance().getDefinition("SalePrice").ranges;
+		avgBySection = new HashMap<>();
+		ranges.stream().map(range->salePrices.stream()
+											 .filter(range)
+											 .mapToDouble(s->(double)s)
+											 .average()
+											 .getAsDouble()
+						)
+						.forEach(avg->{
+							String key = DomainConvertor.getInstance().getCategory("SalePrice", avg+"");
+							avgBySection.put(key, avg);
+						});
 		
-		avgBySection = ranges.stream().map(range->salePrices.stream()
-											 				.filter(range)
-											 				.mapToDouble(s->(double)s)
-											 				.average()
-											 				.getAsDouble()
-									  )
-									  .collect(Collectors.toCollection(ArrayList::new));
 		return avgBySection;
 	}
 	
