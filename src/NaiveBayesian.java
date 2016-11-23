@@ -9,6 +9,10 @@ public class NaiveBayesian {
 	private double total=0.0;	// 분모
 	private HashMap<Integer, Double> predictions = new HashMap<Integer, Double>();
 	
+	
+	public HashMap<Integer, Double> getPredictions() {
+		return predictions;
+	}
 	// 분자를 구하는 함수
 	private Double get_num(ArrayList<String[]> data, String find, int index, String c) {
 		double n=0.0;
@@ -40,7 +44,7 @@ public class NaiveBayesian {
 			HashMap<String, Double> probs = new HashMap<String, Double>();
 			double sum_of_probs = 0.0;
 			double prediction = 0.0;
-			System.out.print("ID: "+test[0]+" prob of ");
+			//System.out.print("ID: "+test[0]+" prob of ");
 			for(String key:c.keySet()){
 				prob = 1.0;
 				// 우선 곱할 수들을 v에 넣어줌. i=0은 id이므로 하지않음
