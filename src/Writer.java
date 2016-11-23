@@ -54,6 +54,7 @@ public class Writer {
 		
 	}
 	
+	/* 필드 나눌 때 사용했음. 더이상 사용하지 않습니다. */
 	public boolean devide(ArrayList<String> attrValues, ArrayList<Double> classValues, String field){
 		String filename = "./fields/"+field+".csv";
 		final String LINE_SEPARATOR = System.getProperty("line.separator");

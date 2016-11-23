@@ -36,18 +36,18 @@ public class DomainConvertor {
 	
 	public void convert(String[] fields, ArrayList<String[]> data) {
 		
-		data.forEach(record->{
-			for(int i=0;i<record.length;i++){
-				String field = fields[i];
-				//If it is Already Categorical Field -> Skip
-				if(!dictionary.keySet().contains(field)) continue;
-				//Else(Numerical Field)
-				record[i] = getCategory(field, record[i]);
-			}
-		});
+		data.parallelStream()
+			.forEach(record->{
+				for(int i=0;i<record.length;i++){
+					String field = fields[i];
+					//If it is Already Categorical Field -> Skip
+					if(!dictionary.keySet().contains(field)) continue;
+					//Else(Numerical Field)
+					record[i] = getCategory(field, record[i]);
+				}
+			});
 		
 	}
-	
 	
 	//A~Z 까지 카테고리를 알려줍니다. 다만 가급적 카테고리를 26개이상으로 나누지는 맙시다.
 	public String getCategory(String field, String value){
@@ -55,10 +55,11 @@ public class DomainConvertor {
 		try{
 			double num = Double.parseDouble(value);
 			//Range가 모든 범위를 커버한다고 가정합니다.
-			ArrayList<Boolean> tmp = dictionary.get(field).ranges.stream()
-					 				   					  .map(range->range.test(num))
-					 				   					  .collect(Collectors.toCollection(ArrayList::new));
-			int i=-1;
+			ArrayList<Boolean> tmp = dictionary.get(field).ranges.parallelStream()
+					 				   					  		 .map(range->range.test(num))
+					 				   					  		 .collect(Collectors.toCollection(ArrayList::new));
+			
+			int i=0;
 			for(i=0;i<tmp.size();i++)
 				if(tmp.get(i)) break;
 			

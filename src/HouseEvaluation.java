@@ -25,27 +25,26 @@ public class HouseEvaluation {
 		convertData();
 		groupByAvg();
 		
-		//3. 데이터를 원하는 형식으로 바꿉니다.
+		long start = System.currentTimeMillis();
 		
+		//3. 어떤 알고리즘이든 상관없게끔 인터페이스 사용.
+		System.out.print("Now Running... ");
+		Algorithm algorithm = NaiveBayesian.getInstance();
+		algorithm.readData(trains, tests, avgBySection);
+		algorithm.runAlgorithm();
+		System.out.println("Done!");
 		
-		//4. 결과를 파일로 씁니다. 주석만 해제하면됩니다.
-		writeResult(new NaiveBayesian(avgBySection).getPredictions());
+		//4. 결과를 파일로 씁니다. output.svc에 써집니다.
+		writeResult(algorithm.getPredictions());
+		System.out.println("Time Elapsed: "+(System.currentTimeMillis()-start)/1000.0+"sec");
 		
-		/*
-		 * 출력을 위한 메서드로,
-		 * printData() : Train, Test 데이터 모두 출력. 근데 출력 결과가 너무 길어서 위에 짤림.
-		 * printTrainData() : Train 데이터 모두 출력. 마찬가지로 위에 짤림.
-		 * printTestData() : Test 데이터 모두 출력. 마찬가지로 위에 짤림.
-		 * 를 미리 작성해두었습니다.
-		 */
-//		printTrainData();
 		
 	}
 	
 	
 	//뉴메릭컬한 SalePrice를 카테고리컬하게 변환하기 전에 미리 빼돌려놓습니다.
 	private ArrayList<Double> saveSalePrices(){
-		salePrices = trains.stream()
+		salePrices = trains.parallelStream()
 				   		   .map(train->Double.parseDouble(train[train.length-1]))
 				   		   .collect(Collectors.toCollection(ArrayList::new));
 		return salePrices;
@@ -55,16 +54,17 @@ public class HouseEvaluation {
 	private HashMap<String,Double> groupByAvg(){
 		ArrayList<Predicate<Double>> ranges = DomainConvertor.getInstance().getDefinition("SalePrice").ranges;
 		avgBySection = new HashMap<>();
-		ranges.stream().map(range->salePrices.stream()
-											 .filter(range)
-											 .mapToDouble(s->(double)s)
-											 .average()
-											 .getAsDouble()
-						)
-						.forEach(avg->{
-							String key = DomainConvertor.getInstance().getCategory("SalePrice", avg+"");
-							avgBySection.put(key, avg);
-						});
+		ranges.parallelStream()
+			  .map(range->salePrices.parallelStream()
+									.filter(range)
+									.mapToDouble(s->(double)s)
+									.average()
+									.getAsDouble()
+			  )
+			  .forEach(avg->{
+				  String key = DomainConvertor.getInstance().getCategory("SalePrice", avg+"");
+				  avgBySection.put(key, avg);
+			  });
 		
 		return avgBySection;
 	}
@@ -126,10 +126,10 @@ public class HouseEvaluation {
 
 	//result<ID, SalePrice>
 	private void writeResult(HashMap<Integer, Double> result){
-		System.out.println("\n\nNow Writing...");
+		System.out.print("Now Writing... ");
 		final String filename = "output.csv";
 		Writer.getInstance().write(result, filename);
-		System.out.println("Write Done!");
+		System.out.println("Done!");
 	}
 
 
