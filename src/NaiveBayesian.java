@@ -43,11 +43,10 @@ public class NaiveBayesian implements Algorithm{
 	@Override
 	public void runAlgorithm() {
 		
-		for(String[] arr:trains){
-			if(c.containsKey(arr[arr.length-1])) c.put(arr[arr.length-1], (c.get(arr[arr.length-1])+1));
-			else c.put(arr[arr.length-1], 1.0);
-			total++;
-		}
+		trains.parallelStream().map(train->train[train.length-1])
+							   .forEach(key->c.put(key, c.getOrDefault(key, 0.0)+1.0));
+		total += trains.size();
+		
 		//for(String s:c.keySet()) System.out.println(s+"="+c.get(s));
 		//System.out.println(total);
 		/*
@@ -57,42 +56,29 @@ public class NaiveBayesian implements Algorithm{
 			System.out.println(get_num(trains, test[1], 1, key));
 		}
 		*/
-		
-		for(String[] test:tests){
-			int i;
-			double prob;	// SalesPrice의 Class c에 대한 확률
+		tests.parallelStream().forEach(test->{
+			
 			HashMap<String, Double> probs = new HashMap<String, Double>();
-			double sum_of_probs = 0.0;
+			double sumOfProbs = 0.0;
 			double prediction = 0.0;
 			//System.out.print("ID: "+test[0]+" prob of ");
 			for(String key:c.keySet()){
-				prob = 1.0;
+				double prob = 1.0;
 				// 우선 곱할 수들을 v에 넣어줌. i=0은 id이므로 하지않음
-				for(i=1;i<test.length;i++) {
-					//System.out.println("분자: "+(get_num(trains, test[i], i, key)+1)+" 분모: "+(c.get(key)+1));
+				for(int i=1;i<test.length;i++)
 					prob *= (getNum(trains, test[i], i, key)+1) / (c.get(key)+1);
-				}
+				
 				prob *= (c.get(key)+1) / (total+1);
 				probs.put(key, prob);
-				sum_of_probs += prob;
-				//System.out.print(key+"="+prob+"\t");
+				sumOfProbs += prob;
 			}
 			
 			for(String key:probs.keySet())
-				prediction += avgBySection.get(key)*probs.get(key)/sum_of_probs;
+				prediction += avgBySection.get(key)*probs.get(key)/sumOfProbs;
 			
 			predictions.put(Integer.valueOf(test[0]), prediction);
-//			System.out.println("Id: "+Integer.valueOf(test[0])+"\tprediction: "+prediction);
-			/*
-			double temp=0.0;
-			for(String key:probs.keySet()){
-				temp+=probs.get(key)/sum_of_probs;
-				System.out.println(key+": "+probs.get(key)/sum_of_probs);
-			}
-			System.out.print("sum_of_prob="+temp);
-			System.out.println("\n");
-			*/
-		}
+			
+		});
 	}
 	
 	@Override
