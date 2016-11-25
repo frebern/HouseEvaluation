@@ -1,12 +1,20 @@
 import java.util.HashMap;
 import java.util.ArrayList;
 
-public class NaiveBayesian implements Algorithm {
-
-	/* For Singleton */
+public class NaiveBayesian implements Algorithm{
+	private HashMap<String, Double> c = new HashMap<String, Double>();	// SalesPrice의 각각 Class c의 개수
+	//private HashMap<String, Double> prob_c = new HashMap<String, Double>();	// 각 c에 대한 확률
+	private ArrayList<String[]> trains;
+	private ArrayList<String[]> tests;
+	HashMap<String, Double> avgBySection;
+	private double total=0.0;	// 분모
+	private HashMap<Integer, Double> predictions = new HashMap<Integer, Double>();
+	
 	private static NaiveBayesian instance;
 
-	private NaiveBayesian() {}
+	private NaiveBayesian() {
+
+	}
 
 	public static NaiveBayesian getInstance() {
 		if (instance == null)
@@ -15,79 +23,81 @@ public class NaiveBayesian implements Algorithm {
 	}
 	
 	
-	// 데이터들
-	private ArrayList<String[]> trains;
-	private ArrayList<String[]> tests;
-	private HashMap<String, Double> avgBySection;
-	
-	// SalesPrice의 각각 Class c의 개수
-	private HashMap<String, Double> classes = new HashMap<String, Double>();
-	private double total; // 분모
+	// 분자를 구하는 함수
+	private Double getNum(ArrayList<String[]> data, String find, int index, String c) {
+		double n=0.0;
+		for(String[] line:data)
+			if ((line[line.length-1].equals(c))&&(line[index].equals(find))) n++;
+		
+		return n;
+	}
 
-	// 예측 결과
-	private HashMap<Integer, Double> predictions = new HashMap<Integer, Double>();
-
-	
-	/* HouseEvaluation으로부터 trains, tests, avgBySection 받는 부분. */
 	@Override
 	public void readData(ArrayList<String[]> trains, ArrayList<String[]> tests,
 			HashMap<String, Double> avgBySection) {
 		this.trains = trains;
 		this.tests = tests;
 		this.avgBySection = avgBySection;
+		
 	}
-
+	@Override
+	public void runAlgorithm() {
+		
+		for(String[] arr:trains){
+			if(c.containsKey(arr[arr.length-1])) c.put(arr[arr.length-1], (c.get(arr[arr.length-1])+1));
+			else c.put(arr[arr.length-1], 1.0);
+			total++;
+		}
+		//for(String s:c.keySet()) System.out.println(s+"="+c.get(s));
+		//System.out.println(total);
+		/*
+		String[] test = tests.get(1107);
+		System.out.println(test[0]);
+		for(String key:c.keySet()){
+			System.out.println(get_num(trains, test[1], 1, key));
+		}
+		*/
+		
+		for(String[] test:tests){
+			int i;
+			double prob;	// SalesPrice의 Class c에 대한 확률
+			HashMap<String, Double> probs = new HashMap<String, Double>();
+			double sum_of_probs = 0.0;
+			double prediction = 0.0;
+			//System.out.print("ID: "+test[0]+" prob of ");
+			for(String key:c.keySet()){
+				prob = 1.0;
+				// 우선 곱할 수들을 v에 넣어줌. i=0은 id이므로 하지않음
+				for(i=1;i<test.length;i++) {
+					//System.out.println("분자: "+(get_num(trains, test[i], i, key)+1)+" 분모: "+(c.get(key)+1));
+					prob *= (getNum(trains, test[i], i, key)+1) / (c.get(key)+1);
+				}
+				prob *= (c.get(key)+1) / (total+1);
+				probs.put(key, prob);
+				sum_of_probs += prob;
+				//System.out.print(key+"="+prob+"\t");
+			}
+			
+			for(String key:probs.keySet())
+				prediction += avgBySection.get(key)*probs.get(key)/sum_of_probs;
+			
+			predictions.put(Integer.valueOf(test[0]), prediction);
+//			System.out.println("Id: "+Integer.valueOf(test[0])+"\tprediction: "+prediction);
+			/*
+			double temp=0.0;
+			for(String key:probs.keySet()){
+				temp+=probs.get(key)/sum_of_probs;
+				System.out.println(key+": "+probs.get(key)/sum_of_probs);
+			}
+			System.out.print("sum_of_prob="+temp);
+			System.out.println("\n");
+			*/
+		}
+	}
 	
-	/* 예상 SalePrices를 리턴하는 부분 */
 	@Override
 	public HashMap<Integer, Double> getPredictions() {
 		return predictions;
 	}
-
 	
-	/* 실제 알고리즘이 돌아가는 파트 */
-	@Override
-	public void runAlgorithm() {
-
-		trains.parallelStream()
-			  .map(arr -> arr[arr.length - 1])
-			  .forEach(arr -> classes.put(arr,classes.getOrDefault(arr, 0.0) + 1.0));
-		total = trains.size();
-
-		tests.parallelStream()
-			 .forEach(test -> {
-				double prob; // SalesPrice의 Class c에 대한 확률
-				HashMap<String, Double> probs = new HashMap<String, Double>();
-				double probSum = 0.0;
-				double prediction = 0.0;
-				for (String key : classes.keySet()) {
-					prob = 1.0;
-					// 우선 곱할 수들을 v에 넣어줌. i=0은 id이므로 하지않음
-					for (int i = 1; i < test.length; i++)
-						prob *= ((getNum(trains, test[i], i, key) + 1) / (classes.get(key) + 1));
-					 
-					prob *= ((classes.get(key) + 1) / (total + 1));
-					probs.put(key, prob);
-					probSum += prob;
-				}
-				 
-				final double tmpProbSum = probSum;
-				prediction = probs.keySet().stream()
-						 				   .mapToDouble(key -> avgBySection.get(key) * probs.get(key) / tmpProbSum)
-						 				   .sum();
-				 
-				predictions.put(Integer.parseInt(test[0]), prediction);
-//				System.out.println("Id: " + Integer.valueOf(test[0])+"\tprediction: " + prediction);
-				 
-			 });
-	}
-
-	
-	/* 분자를 구하는 메서드 */
-	private double getNum(ArrayList<String[]> data, String find, int index, String c) {
-		return data.stream()
-				   .filter(line -> (line[line.length - 1].equals(c))&& (line[index].equals(find)))
-				   .count();
-	}
-
 }

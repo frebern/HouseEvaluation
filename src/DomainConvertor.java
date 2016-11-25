@@ -35,7 +35,6 @@ public class DomainConvertor {
 	}
 	
 	public void convert(String[] fields, ArrayList<String[]> data) {
-		System.out.println("test");
 		data.parallelStream()
 			.forEach(record->{
 				for(int i=0;i<record.length;i++){

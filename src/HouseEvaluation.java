@@ -17,8 +17,6 @@ public class HouseEvaluation {
 	
 	public HouseEvaluation(){
 		
-		
-		
 		//1. 트레이닝/테스트/카테고리 데이터를 읽고 저장합니다. SalePrice는 따로 빼놓습니다.
 		readData();
 		saveSalePrices();
@@ -28,6 +26,8 @@ public class HouseEvaluation {
 		//2. Numeric을 Category로 바꿔줍니다. SalePrice는 카테고리별 평균을 미리 계산해 놓습니다.
 		convertData();
 		groupByAvg();
+		
+//		printData();
 		
 		long start = System.currentTimeMillis();
 		
@@ -115,16 +115,18 @@ public class HouseEvaluation {
 		System.out.println("Test Cases");
 		//Print Fields
 		for(String field : fields)
-			System.out.print(field+"\t");
+			System.out.printf("%16s",field);
 		//Print Test Data
 		tests.forEach(test->{
 			System.out.println();
 			for(int i=0;i<test.length;i++)
-				System.out.print(test[i]+"\t");
+				System.out.printf("%16s",test[i]);
 		});
 //		Print Fields(출력결과가 너무 길어서 필드명 밑에 한번 더 출력)
+		System.out.println();
 		for(String field : fields)
-			System.out.print(field+" ");
+			System.out.printf("%16s",field);
+		System.out.println();
 	}
 	
 
