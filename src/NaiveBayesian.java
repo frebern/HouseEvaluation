@@ -43,9 +43,11 @@ public class NaiveBayesian implements Algorithm{
 	@Override
 	public void runAlgorithm() {
 		
-		trains.parallelStream().map(train->train[train.length-1])
-							   .forEach(key->c.put(key, c.getOrDefault(key, 0.0)+1.0));
-		total += trains.size();
+		for(String[] arr:trains){
+			if(c.containsKey(arr[arr.length-1])) c.put(arr[arr.length-1], (c.get(arr[arr.length-1])+1));
+			else c.put(arr[arr.length-1], 1.0);
+			total++;
+		}
 		
 		//for(String s:c.keySet()) System.out.println(s+"="+c.get(s));
 		//System.out.println(total);
@@ -61,7 +63,7 @@ public class NaiveBayesian implements Algorithm{
 			HashMap<String, Double> probs = new HashMap<String, Double>();
 			double sumOfProbs = 0.0;
 			double prediction = 0.0;
-			//System.out.print("ID: "+test[0]+" prob of ");
+			
 			for(String key:c.keySet()){
 				double prob = 1.0;
 				// 우선 곱할 수들을 v에 넣어줌. i=0은 id이므로 하지않음
