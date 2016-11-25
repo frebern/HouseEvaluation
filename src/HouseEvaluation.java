@@ -17,9 +17,13 @@ public class HouseEvaluation {
 	
 	public HouseEvaluation(){
 		
+		
+		
 		//1. 트레이닝/테스트/카테고리 데이터를 읽고 저장합니다. SalePrice는 따로 빼놓습니다.
 		readData();
 		saveSalePrices();
+		
+		attrDevide();
 		
 		//2. Numeric을 Category로 바꿔줍니다. SalePrice는 카테고리별 평균을 미리 계산해 놓습니다.
 		convertData();
@@ -133,7 +137,7 @@ public class HouseEvaluation {
 	}
 
 
-	@SuppressWarnings("unused")
+//	@SuppressWarnings("unused")
 	private void attrDevide(){
 		/***** Attribute Spliter *****/
 		String[] fields = Reader.getInstance().getFields();
