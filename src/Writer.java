@@ -44,6 +44,8 @@ public class Writer {
 		return true;
 	}
 	
+	
+	
 	class Pair{
 		
 		String k;
@@ -83,5 +85,10 @@ public class Writer {
 			return false;
 		}
 		return true;
+	}
+
+	public void writeNonNaTable(String filename, ArrayList<String[]> table) {
+		// TODO Auto-generated method stub
+		
 	}
 }
