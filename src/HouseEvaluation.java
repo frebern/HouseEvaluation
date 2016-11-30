@@ -138,10 +138,30 @@ public class HouseEvaluation {
 	}
 
 	//해당 컬럼을 테이블의 맨 뒤로 보냅니다.
-	private void columnToClass(String fieldName, ArrayList<String[]> table) {
-		// TODO Auto-generated method stub
-		
-	}
+		private void columnToClass(String fieldName, ArrayList<String[]> table) {
+			int index=0,i;
+			// fieldName의 index를 구한다.
+			for(i=0;i<fields.length;i++)
+				if(fields[i].equals(fieldName))
+					index=i;
+			for(String[] line:table){
+				// 순서가 바뀔 row -> temp
+				String[] temp = new String[line.length];
+				for(i=0;i<line.length;i++){
+					if(i!=index) temp[i]=line[i]; // 바꿀 index를 만날때까지 그냥 복사
+					else{	// 만나면 맨뒤로 복사하고
+						temp[temp.length-1] = line[i];
+						i++;
+						// i를 1올리고 남은 아이템을 한칸씩 밀려서 추가. 맨뒤로 하나를 추가한 뒤므로 length-1번까지 수행한다.
+						for(;i<line.length-1;i++) temp[i-1] = line[i];
+						// i가 충분히 올라갔겠지만 명시적으로 break.
+						break;
+					}
+				}
+				table.set(table.indexOf(line), temp);	// 해당 line을 순서가 바뀐 temp로 교체
+			}
+			
+		}
 
 	//테이블을 na_IDs 인놈들과 아닌놈들로 나눕니다. ArrayList<String[]> trains_num과 ArrayList<String[]> tests_num.
 	private void seperateTables(ArrayList<String[]> table, ArrayList<Integer> na_IDs) {
