@@ -24,7 +24,7 @@ public class HouseEvaluation {
 	private ArrayList<String[]> trains_next;
 	private ArrayList<String[]> tests_next;
 	
-	private ArrayList<String> naFields;
+	private ArrayList<String> naFields = new ArrayList<>();
 	
 	private HashMap<String, ArrayList<Integer>> whoIsNA = new HashMap<>();
 	
@@ -147,6 +147,14 @@ public class HouseEvaluation {
 	//NA Field가 어떤것들이 있는지 초기화합니다.
 	private void initNaFields(ArrayList<String[]> table, ArrayList<String> naFields) {
 		// TODO Auto-generated method stub
+		int i;
+		ArrayList<ArrayList<String>> fieldDatas = new ArrayList<ArrayList<String>>();
+		for(String field:fields) fieldDatas.add(new ArrayList<String>());
+		for(String[] line:table)
+			for(i=0;i<line.length;i++)
+				fieldDatas.get(i).add(line[i]);
+		for(i=0;i<fieldDatas.size();i++)
+			if(fieldDatas.get(i).contains("NA")) naFields.add(fields[i]);
 		
 	}
 
