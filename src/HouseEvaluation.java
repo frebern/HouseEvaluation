@@ -137,9 +137,12 @@ public class HouseEvaluation {
 		
 	}
 
-	//테이블을 na_IDs 인놈들과 아닌놈들로 나눕니다.
+	//테이블을 na_IDs 인놈들과 아닌놈들로 나눕니다. ArrayList<String[]> trains_num과 ArrayList<String[]> tests_num.
 	private void seperateTables(ArrayList<String[]> table, ArrayList<Integer> na_IDs) {
-		// TODO Auto-generated method stub
+		for(String[] line:table){
+			if(na_IDs.contains(line[0])) tests_num.add(line);
+			else trains_num.add(line);
+		}
 		
 	}
 
