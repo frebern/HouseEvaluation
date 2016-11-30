@@ -122,6 +122,14 @@ public class HouseEvaluation {
 	private void reflectResults(ArrayList<String[]> originTable, HashMap<String, HashMap<Integer, String>> results) {
 		// TODO Auto-generated method stub
 		
+		for(int i=0;i<originTable.size();i++)
+		{
+			for(int j=0;j<originTable.get(i).length;j++)
+			{
+				
+			}
+		}
+		
 	}
 
 	//해당 필드가 뉴메릭 필드인지 알아냅니다. DomainConvertor 클래스를 쓰면 될 것입니다.
