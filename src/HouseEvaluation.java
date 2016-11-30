@@ -134,9 +134,7 @@ public class HouseEvaluation {
 
 	//해당 필드가 뉴메릭 필드인지 알아냅니다. DomainConvertor 클래스를 쓰면 될 것입니다.
 	private boolean isNumericField(String fieldName) {
-		// TODO Auto-generated method stub
-		
-		return false;
+		return DomainConvertor.getInstance().getDefinition(fieldName)!=null;
 	}
 
 	//해당 컬럼을 테이블의 맨 뒤로 보냅니다.
@@ -181,7 +179,6 @@ public class HouseEvaluation {
 
 	//NA Field가 어떤것들이 있는지 초기화합니다.
 	private void initNaFields(ArrayList<String[]> table, ArrayList<String> naFields) {
-		// TODO Auto-generated method stub
 		int i;
 		ArrayList<ArrayList<String>> fieldDatas = new ArrayList<ArrayList<String>>();
 		for(String field:fields) fieldDatas.add(new ArrayList<String>());
