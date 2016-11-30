@@ -24,7 +24,7 @@ public class HouseEvaluation {
 	private ArrayList<String[]> trains_next;
 	private ArrayList<String[]> tests_next;
 	
-	private ArrayList<String> naFields;
+	private ArrayList<String> naFields = new ArrayList<>();
 	
 	private HashMap<String, ArrayList<Integer>> whoIsNA = new HashMap<>();
 	
@@ -98,10 +98,16 @@ public class HouseEvaluation {
 	}
 	
 	
-	//from에서 to로 deepcopy합니다.
+	//from에서 to로 Deep Copy합니다.
 	private void copyTo(ArrayList<String[]> from, ArrayList<String[]> to) {
-		// TODO Auto-generated method stub
-		
+		to.clear();
+		from.forEach(origin->{
+			final int SIZE = origin.length;
+			String[] newOne = new String[SIZE];
+			for(int i=0;i<SIZE;i++)
+				newOne[i] = new StringBuilder(origin[i]).append("").toString().trim();
+			to.add(newOne);
+		});
 	}
 
 	//oldTable과 reflectedTable의 내용물이 전부 같은치 확인합니다.(수렴하는지 여부 확인)
