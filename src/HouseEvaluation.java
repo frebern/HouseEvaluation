@@ -171,7 +171,6 @@ public class HouseEvaluation {
 
 	//NA Field가 어떤것들이 있는지 초기화합니다.
 	private void initNaFields(ArrayList<String[]> table, ArrayList<String> naFields) {
-		// TODO Auto-generated method stub
 		int i;
 		ArrayList<ArrayList<String>> fieldDatas = new ArrayList<ArrayList<String>>();
 		for(String field:fields) fieldDatas.add(new ArrayList<String>());
