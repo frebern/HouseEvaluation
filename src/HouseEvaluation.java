@@ -126,9 +126,7 @@ public class HouseEvaluation {
 
 	//해당 필드가 뉴메릭 필드인지 알아냅니다. DomainConvertor 클래스를 쓰면 될 것입니다.
 	private boolean isNumericField(String fieldName) {
-		// TODO Auto-generated method stub
-		
-		return false;
+		return DomainConvertor.getInstance().getDefinition(fieldName)!=null;
 	}
 
 	//해당 컬럼을 테이블의 맨 뒤로 보냅니다.
