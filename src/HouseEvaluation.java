@@ -141,7 +141,44 @@ public class HouseEvaluation {
 	//whoIsNA는 HashMap<FieldName:String, IDs:ArrayList<ID:Integer>> 의 형식입니다. 
 	private void initWhoIsNA(ArrayList<String[]> table, ArrayList<String> naFields) {
 		// TODO Auto-generated method stub
+		int index=0;
+		ArrayList<Integer> FieldsIndex=new ArrayList<Integer>();
 		
+		/*for(int i=0;i<fields.length;i++)
+		{
+			if(fields[i].equals(naFields.get(index)))
+			{
+				FieldsIndex.add(i);
+			}
+		}*/
+		
+		for(int i=0;i<table.size();i++)
+		{	
+			for(int j=0;j<table.get(i).length;j++)
+			{
+				if(table.get(i)[j].equals("NA"))
+				{
+					if(whoIsNA.get(fields[j])!=null)
+					{
+						ArrayList<Integer> naIndex=new ArrayList<Integer>();
+						naIndex=whoIsNA.get(fields[j]);
+						naIndex.add(j);
+						whoIsNA.put(fields[j],naIndex);
+					}
+					else
+					{
+						ArrayList<Integer> naIndex=new ArrayList<Integer>();
+						naIndex.add(j);
+						whoIsNA.put(fields[j],naIndex);
+					}
+				}
+			}
+			/*if(table.get(i).equals(naFields.get(index)))
+			{
+				
+				
+			}*/
+		}
 	}
 
 	//NA Field가 어떤것들이 있는지 초기화합니다.
