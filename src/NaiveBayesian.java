@@ -2,13 +2,13 @@ import java.util.HashMap;
 import java.util.ArrayList;
 
 public class NaiveBayesian implements Algorithm{
-	private HashMap<String, Double> c = new HashMap<String, Double>();	// SalesPrice의 각각 Class c의 개수
-	//private HashMap<String, Double> prob_c = new HashMap<String, Double>();	// 각 c에 대한 확률
+	private HashMap<String, Double> c = new HashMap<String, Double>();	// class종류별 개수
+	//private HashMap<String, Double> prob_c = new HashMap<String, Double>();	// 각 class에 대한 확률
 	private ArrayList<String[]> trains;
 	private ArrayList<String[]> tests;
 	HashMap<String, Double> avgBySection;
 	private double total=0.0;	// 분모
-	private HashMap<Integer, Double> predictions = new HashMap<Integer, Double>();
+	private HashMap<Integer, String> predictions = new HashMap<Integer, String>(); // <Integer, Double> -> <Integer, String>으로 바뀜
 	
 	private static NaiveBayesian instance;
 
@@ -41,23 +41,14 @@ public class NaiveBayesian implements Algorithm{
 		
 	}
 	@Override
-	public void runAlgorithm() {
+	public void runAlgorithm(boolean isCat) {
 		
 		for(String[] arr:trains){
 			if(c.containsKey(arr[arr.length-1])) c.put(arr[arr.length-1], (c.get(arr[arr.length-1])+1));
 			else c.put(arr[arr.length-1], 1.0);
 			total++;
 		}
-		
-		//for(String s:c.keySet()) System.out.println(s+"="+c.get(s));
-		//System.out.println(total);
-		/*
-		String[] test = tests.get(1107);
-		System.out.println(test[0]);
-		for(String key:c.keySet()){
-			System.out.println(get_num(trains, test[1], 1, key));
-		}
-		*/
+
 		tests.parallelStream().forEach(test->{
 			
 			HashMap<String, Double> probs = new HashMap<String, Double>();
@@ -75,16 +66,28 @@ public class NaiveBayesian implements Algorithm{
 				sumOfProbs += prob;
 			}
 			
-			for(String key:probs.keySet())
-				prediction += avgBySection.get(key)*probs.get(key)/sumOfProbs;
+			if(isCat){
+				String maxKey="";
+				double maxProb=0.0;
+				for(String key:probs.keySet()){
+					if(probs.get(key) > maxProb){
+						maxProb = probs.get(key);
+						maxKey = key;
+					}
+				}
+				predictions.put(Integer.valueOf(test[0]), maxKey);
+			}
+			else{
+				for(String key:probs.keySet())
+					prediction += avgBySection.get(key)*probs.get(key)/sumOfProbs;
 			
-			predictions.put(Integer.valueOf(test[0]), prediction);
-			
+				predictions.put(Integer.valueOf(test[0]), String.valueOf(prediction));
+			}
 		});
 	}
 	
 	@Override
-	public HashMap<Integer, Double> getPredictions() {
+	public HashMap<Integer, String> getPredictions() {
 		return predictions;
 	}
 	
