@@ -35,11 +35,11 @@ public class HouseEvaluation {
 		System.out.print("Now Running... ");
 		Algorithm algorithm = NaiveBayesian.getInstance();
 		algorithm.readData(trains, tests, avgBySection);
-		algorithm.runAlgorithm();
+		//algorithm.runAlgorithm();
 		System.out.println("Done!");
 		
 		//4. 결과를 파일로 씁니다. output.svc에 써집니다.
-		writeResult(algorithm.getPredictions());
+		//writeResult(algorithm.getPredictions());
 		System.out.println("Time Elapsed: "+(System.currentTimeMillis()-start)/1000.0+"sec");
 		
 		
