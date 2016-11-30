@@ -146,17 +146,6 @@ public class HouseEvaluation {
 	//whoIsNA를 초기화합니다. 
 	//whoIsNA는 HashMap<FieldName:String, IDs:ArrayList<ID:Integer>> 의 형식입니다. 
 	private void initWhoIsNA(ArrayList<String[]> table, ArrayList<String> naFields) {
-		// TODO Auto-generated method stub
-		int index=0;
-		ArrayList<Integer> FieldsIndex=new ArrayList<Integer>();
-		
-		/*for(int i=0;i<fields.length;i++)
-		{
-			if(fields[i].equals(naFields.get(index)))
-			{
-				FieldsIndex.add(i);
-			}
-		}*/
 		
 		for(int i=0;i<table.size();i++)
 		{	
@@ -179,11 +168,6 @@ public class HouseEvaluation {
 					}
 				}
 			}
-			/*if(table.get(i).equals(naFields.get(index)))
-			{
-				
-				
-			}*/
 		}
 	}
 
