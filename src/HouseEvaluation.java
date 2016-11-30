@@ -278,4 +278,4 @@ public class HouseEvaluation {
 	}
 	
 }
->>>>>>> 0787512945bafb4726fac3845e991f9949056bc3
+
