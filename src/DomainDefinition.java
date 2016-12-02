@@ -9,7 +9,7 @@ import java.util.function.Predicate;
  */
 public class DomainDefinition {
 
-	private final static double MIN = Double.MIN_VALUE;
+	private final static double MIN = -9999;
 	private final static double MAX = Double.MAX_VALUE; 
 	
 	public String field;//ÇÊµå¸í

@@ -13,7 +13,7 @@ public class HouseEvaluation {
 	private ArrayList<String[]> tests;
 	
 	private ArrayList<Double> salePrices;
-	private HashMap<String,Double> avgBySection;
+	private HashMap<String,Double> avgBySection = new HashMap<>();
 	
 	private ArrayList<String[]> trains_num = new ArrayList<>();
 	private ArrayList<String[]> tests_num = new ArrayList<>();
@@ -49,16 +49,21 @@ public class HouseEvaluation {
 		//각 NA필드에대해서 어떤 ID가 NA인지 구합니다.
 		initWhoIsNA(table, naFields);
 		
+		int iteration = 1;
 		do{
+			
+			System.out.println("Iteration #"+iteration++);
 			
 			//결과와 중간에 사용한 어레이리스트 모두 클리어 합니다.
 			clearAll();
 			
 			//각 NA 필드에 대해서.
 			for(String fieldName : naFields){
+				
+				System.out.println("Debug For "+fieldName);
+				
 				//현재 뉴메릭한 통합테이블을 trains_num과 tests_num으로 나눕니다.
 				//System.out.println("\nKey:"+fieldName+",Values:"+whoIsNA.get(fieldName));
-				
 				seperateTables(table, whoIsNA.get(fieldName));
 				
 				//딥카피 합니다.
@@ -81,16 +86,20 @@ public class HouseEvaluation {
 				boolean isCat = !isNumericField(fieldName);
 				if(!isCat){
 					/* 캡슐화 필요. */
-//					System.out.println("DEBUG:");
-//					trains_num.forEach(train->{
-//						for(String word:train)
-//							System.out.print(word+" ");
-//						System.out.println();
-//					});
+					System.out.println(fieldName+" is Numeric Field");
+					
+					System.out.printf("Value of '"+fieldName+"' in trains_num:\t");
+					trains_num.forEach(train->
+						System.out.print(train[train.length-1]+"\t"));
+					System.out.printf("\nValue of '"+fieldName+"' in trains_cat:\t");
+					trains_cat.forEach(train->
+						System.out.print(train[train.length-1]+"\t"));
+					
+					System.out.println();
 					ArrayList<Double> values = trains_num.parallelStream()
 					   		   						 	 .map(train->Double.parseDouble(train[train.length-1]))
 					   		   						 	 .collect(Collectors.toCollection(ArrayList::new));
-					avgBySection = groupByAvg(fieldName,values);
+					groupByAvg(fieldName,values);
 				}
 				
 				//알고리즘 돌립니다.
@@ -105,6 +114,7 @@ public class HouseEvaluation {
 			
 			//바뀐 결과들을 table에 반영합니다.
 			reflectResults(table, results);
+			System.out.println();
 			
 		}while(!isConverge(table_old, table)); //수렴하지 않으면 계속 돌립니다.
 	
@@ -121,6 +131,7 @@ public class HouseEvaluation {
 		tests_num.clear();
 		tests_cat.clear();
 		tests_next.clear();
+		avgBySection.clear();
 	}
 
 
@@ -178,7 +189,7 @@ public class HouseEvaluation {
 	
 	//해당 필드가 뉴메릭 필드인지 알아냅니다. DomainConvertor 클래스를 쓰면 될 것입니다.
 	private boolean isNumericField(String fieldName) {
-		return DomainConvertor.getInstance().getDefinition(fieldName)!=null;
+		return DomainConvertor.getInstance().isNumericField(fieldName);
 	}
 
 	//해당 컬럼을 테이블의 맨 뒤로 보냅니다.
@@ -216,11 +227,12 @@ public class HouseEvaluation {
 
 	//테이블을 na_IDs 인놈들과 아닌놈들로 나눕니다. ArrayList<String[]> trains_num과 ArrayList<String[]> tests_num.
 	private void seperateTables(ArrayList<String[]> table, ArrayList<Integer> na_IDs) {
+		trains_num.clear();
+		tests_num.clear();
 		for(String[] line:table){
 			if(na_IDs.contains(Integer.valueOf(line[0]))) tests_num.add(line);
 			else trains_num.add(line);
 		}
-		
 	}
 
 	//whoIsNA를 초기화합니다. 
@@ -264,29 +276,16 @@ public class HouseEvaluation {
 		
 	}
 
-
-	//뉴메릭컬한 SalePrice를 카테고리컬하게 변환하기 전에 미리 빼돌려놓습니다.
-	@SuppressWarnings("unused")
-	private ArrayList<Double> saveSalePrices(){
-		salePrices = trains.parallelStream()
-				   		   .map(train->Double.parseDouble(train[train.length-1]))
-				   		   .collect(Collectors.toCollection(ArrayList::new));
-		return salePrices;
-	}
-	
 	//범위별로 SalePrice 그룹을 나누고 각 그룹별 평균을 구합니다.
 	private HashMap<String,Double> groupByAvg(String fieldName, ArrayList<Double> values){
 		ArrayList<Predicate<Double>> ranges = DomainConvertor.getInstance().getDefinition(fieldName).ranges;
-		avgBySection = new HashMap<>();
+		avgBySection.clear();
 		ranges.parallelStream()
-			  .map(range->{
-				  //System.out.println("DEBUG:"+values);
-				  return values.parallelStream()
+			  .map(range->values.stream()
 								.filter(range)
 								.mapToDouble(s->(double)s)
 								.average()
-								.getAsDouble();
-			  }
+								.getAsDouble()
 			  )
 			  .forEach(avg->{
 				  String key = DomainConvertor.getInstance().getCategory(fieldName, avg+"");
@@ -311,84 +310,11 @@ public class HouseEvaluation {
 		tests = Reader.getInstance().getTests();
 	}
 	
-	private void printData(){
-		printTrainData();
-		System.out.println();
-		printTestData();
-	}
-
-	private void printTrainData() {
-		System.out.println("Training Datas");
-		//Print Fields
-		for(String field : fields)
-			System.out.print(field+"\t");
-		//Print Training Data
-		trains.forEach(train->{
-			System.out.println();
-			for(int i=0;i<train.length;i++)
-				System.out.print(train[i]+"\t");
-		});
-		System.out.println();
-//		Print Fields(출력결과가 너무 길어서 필드명 밑에 한번 더 출력)
-		for(String field : fields)
-			System.out.print(field+" ");
-	}
-
-	private void printTestData(){
-		System.out.println("Test Cases");
-		//Print Fields
-		for(String field : fields)
-			System.out.printf("%16s",field);
-		//Print Test Data
-		tests.forEach(test->{
-			System.out.println();
-			for(int i=0;i<test.length;i++)
-				System.out.printf("%16s",test[i]);
-		});
-//		Print Fields(출력결과가 너무 길어서 필드명 밑에 한번 더 출력)
-		System.out.println();
-		for(String field : fields)
-			System.out.printf("%16s",field);
-		System.out.println();
-	}
-	
-
-	//result<ID, SalePrice>
-	private void writeResult(HashMap<Integer, Double> result){
-		System.out.print("Now Writing... ");
-		final String filename = "output.csv";
-		Writer.getInstance().write(result, filename);
-		System.out.println("Done!");
-	}
-
-
-	@SuppressWarnings("unused")
-	private void attrDevide(){
-		/***** Attribute Spliter *****/
-		String[] fields = Reader.getInstance().getFields();
-		for(int i = 0;i<fields.length;i++){
-			String field = fields[i];
-			trains.sort((t1,t2)->{
-				Long n1 = Long.parseLong(t1[t1.length-1]);
-				Long n2 = Long.parseLong(t2[t2.length-1]);
-				return n1.compareTo(n2);
-			});
-			int index = i;
-			ArrayList<String> keys = new ArrayList<>();
-			ArrayList<Double> values = new ArrayList<>();
-			trains.forEach(train->{
-				keys.add(train[index]);
-				values.add(Double.parseDouble(train[train.length-1]));
-			});
-			
-			Writer.getInstance().devide(keys, values, field);
-		}
-	}
 	
 
 	public static void main(String[] args) {
 		long start = System.currentTimeMillis();
-		System.out.print("Now Running... ");
+		System.out.println("Now Running... ");
 		new HouseEvaluation();
 		System.out.println("Done!");
 		System.out.println("Time Elapsed: "+(System.currentTimeMillis()-start)/1000.0+"sec");

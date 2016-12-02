@@ -41,10 +41,13 @@ public class NaiveBayesian implements Algorithm{
 		this.trains = trains;
 		this.tests = tests;
 		this.avgBySection = avgBySection;
-		
 	}
 	@Override
 	public void runAlgorithm(boolean isCat) {
+		
+		c.clear();
+		predictions.clear();
+		total=0.0;
 		
 		for(String[] arr:trains){
 			if(c.containsKey(arr[arr.length-1])) c.put(arr[arr.length-1], (c.get(arr[arr.length-1])+1));
@@ -81,8 +84,10 @@ public class NaiveBayesian implements Algorithm{
 				predictions.put(Integer.valueOf(test[0]), maxKey);
 			}
 			else{
-				for(String key:probs.keySet())
+				for(String key:probs.keySet()){
+					if(avgBySection.get(key)==null) System.out.println("avgBySection has key '"+key+"' which has value null");
 					prediction += avgBySection.get(key)*probs.get(key)/sumOfProbs;
+				}
 			
 				predictions.put(Integer.valueOf(test[0]), String.valueOf(prediction));
 			}

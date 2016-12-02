@@ -68,7 +68,10 @@ public class DomainConvertor {
 			//NA같은 숫자가 아닌 값은 그자체로 하나의 카테고리로써 생각합니다.
 			return value;
 		}
-		
+	}
+	
+	public boolean isNumericField(String fieldName){
+		return dictionary.keySet().stream().anyMatch(key->key.trim().equals(fieldName.trim()));
 	}
 
 	public static DomainConvertor getInstance() {
