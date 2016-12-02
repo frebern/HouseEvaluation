@@ -75,8 +75,17 @@ public class HouseEvaluation {
 				
 				//만약 현재 class가 원래 numeric이라면 각 구간별 평균도 구해놓습니다.
 				boolean isCat = !isNumericField(fieldName);
-				if(!isCat)
-					avgBySection = groupByAvg(fieldName);
+				if(!isCat){
+					/* 캡슐화 필요. */
+					int i=0;
+					for(;i<fields.length-1;i++);
+						if(fields[i].equals(fieldName)) break;
+					int index = i;
+					ArrayList<Double> values = trains.parallelStream()
+					   		   						 .map(train->Double.parseDouble(train[index]))
+					   		   						 .collect(Collectors.toCollection(ArrayList::new));
+					avgBySection = groupByAvg(fieldName,values);
+				}
 				
 				//알고리즘 돌립니다.
 				Algorithm algorithm = NaiveBayesian.getInstance();
@@ -253,15 +262,15 @@ public class HouseEvaluation {
 	}
 	
 	//범위별로 SalePrice 그룹을 나누고 각 그룹별 평균을 구합니다.
-	private HashMap<String,Double> groupByAvg(String fieldName){
+	private HashMap<String,Double> groupByAvg(String fieldName, ArrayList<Double> values){
 		ArrayList<Predicate<Double>> ranges = DomainConvertor.getInstance().getDefinition(fieldName).ranges;
 		avgBySection = new HashMap<>();
 		ranges.parallelStream()
-			  .map(range->salePrices.parallelStream()
-									.filter(range)
-									.mapToDouble(s->(double)s)
-									.average()
-									.getAsDouble()
+			  .map(range->values.parallelStream()
+								.filter(range)
+								.mapToDouble(s->(double)s)
+								.average()
+								.getAsDouble()
 			  )
 			  .forEach(avg->{
 				  String key = DomainConvertor.getInstance().getCategory(fieldName, avg+"");
