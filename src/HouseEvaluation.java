@@ -114,7 +114,19 @@ public class HouseEvaluation {
 	private boolean isConverge(ArrayList<String[]> oldTable, ArrayList<String[]> reflectedTable) {
 		// TODO Auto-generated method stub
 		
-		return false;
+		for(int i=0;i<oldTable.size();i++)
+		{
+			for(int j=0;j<oldTable.get(i).length;j++)
+			{
+				if(!oldTable.get(i)[j].equals(reflectedTable.get(i)[j]))
+				{
+					return false;
+				}
+				
+			}
+		}
+		
+		return true;
 	}
 
 	//results에는 Prediction으로 나온 결과들이 <ID, Result> 페어로 들어있는데, key는 해당 필드명입니다.
