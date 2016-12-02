@@ -85,11 +85,11 @@ public class NaiveBayesian implements Algorithm{
 			}
 			else{
 				for(String key:probs.keySet()){
-					if(avgBySection.get(key)==null) System.out.println("avgBySection has key '"+key+"' which has value null");
 					prediction += avgBySection.get(key)*probs.get(key)/sumOfProbs;
+//					System.out.println("Key:"+key+",Prediction:"+prediction);
 				}
-			
-				predictions.put(Integer.valueOf(test[0]), String.valueOf(prediction));
+				predictions.put(Integer.parseInt(test[0]), prediction+"");
+				
 			}
 		});
 	}

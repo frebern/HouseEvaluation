@@ -31,7 +31,8 @@ public class HouseEvaluation {
 	//HashMap<FieldName:String, Result:HashMap<ID,Result>>
 	private HashMap<String,HashMap<Integer,String>> results = new HashMap<>();
 	
-	ArrayList<String[]> table_old = new ArrayList<>();
+	ArrayList<String[]> table_before = new ArrayList<>();
+	ArrayList<String[]> table_after = new ArrayList<>();
 	
 	public HouseEvaluation(){
 		int count=0;
@@ -66,12 +67,11 @@ public class HouseEvaluation {
 				
 				//현재 뉴메릭한 통합테이블을 trains_num과 tests_num으로 나눕니다.
 				//System.out.println("\nKey:"+fieldName+",Values:"+whoIsNA.get(fieldName));
-				copyTo(table,table_old);
-				
+				copyTo(table,table_before);
+				copyTo(table,table_after);
 				seperateTables(table, whoIsNA.get(fieldName));
 				
 				//딥카피 합니다.
-				
 				copyTo(trains_num,trains_cat);
 				copyTo(tests_num,tests_cat);
 				copyTo(trains_num,trains_next);
@@ -92,12 +92,12 @@ public class HouseEvaluation {
 					/* 캡슐화 필요. */
 					System.out.println(fieldName+" is Numeric Field");
 					
-					System.out.printf("Value of '"+fieldName+"' in trains_num:\t");
-					trains_num.forEach(train->
-						System.out.print(train[train.length-1]+"\t"));
-					System.out.printf("\nValue of '"+fieldName+"' in trains_cat:\t");
-					trains_cat.forEach(train->
-						System.out.print(train[train.length-1]+"\t"));
+					System.out.printf("Value of '"+fieldName+"' in tests_num:\t");
+					tests_num.forEach(test->
+						System.out.print(test[test.length-1]+"\t"));
+					System.out.printf("\nValue of '"+fieldName+"' in test_cat:\t");
+					tests_cat.forEach(test->
+						System.out.print(test[test.length-1]+"\t"));
 					
 					System.out.println();
 					ArrayList<Double> values = trains_num.parallelStream()
@@ -108,6 +108,7 @@ public class HouseEvaluation {
 				
 				//알고리즘 돌립니다.
 				Algorithm algorithm = NaiveBayesian.getInstance();
+//				System.out.println("avgBySection: "+avgBySection);
 				algorithm.readData(trains_cat, tests_cat, avgBySection);
 				algorithm.runAlgorithm(isCat);
 				HashMap<Integer, String> result = algorithm.getPredictions();
@@ -118,18 +119,19 @@ public class HouseEvaluation {
 				
 			}
 			//바뀐 결과들을 table에 반영합니다.
-			reflectResults(table, results);
+			reflectResults(table_after, results);
+			copyTo(table_after,table);
 			count++;
-			if(count==20)
+			if(count==10)
 			{
 				Writer.getInstance().writeNonNaTable("train_non_na.csv",table,fields);
 			}
-			if(count==21)
+			if(count==11)
 			{
 				break;
 			}
 			
-		}while(!isConverge(table_old, table)); //수렴하지 않으면 계속 돌립니다.
+		}while(!isConverge(table_before, table_after)); //수렴하지 않으면 계속 돌립니다.
 	
 		/*for(int i=0;i<table.size();i++)
 		{
@@ -139,7 +141,7 @@ public class HouseEvaluation {
 			}
 			System.out.println();
 		}*/
-		Writer.getInstance().writeNonNaTable("train_non_na1.csv",table,fields);
+		Writer.getInstance().writeNonNaTable("train_non_na1.csv",table_after,fields);
 		
 	}
 	
@@ -191,19 +193,20 @@ public class HouseEvaluation {
 	//originTable에 results를 한번에 반영합니다.
 	private void reflectResults(ArrayList<String[]> originTable, HashMap<String, HashMap<Integer, String>> results) {
 
-		for(int i=0;i<fields.length;i++)
-		{
-			if(results.get(fields[i])!=null)
-			{
-				for(int j=0;j<originTable.size();j++)
-				{
-					if(results.get(fields[i]).get(j)!=null)
-					{
-						originTable.get(j)[i]=results.get(fields[i]).get(j);
-					}
-				}
-			}
-		}
+		results.forEach((k,v)->{
+			int i=0;
+			for(;i<fields.length;i++)
+				if(fields[i].equals(k))
+					break;
+			int index = i;
+			
+			originTable.stream().filter(record->
+									v.keySet().stream().anyMatch(id-> (id+0)==Integer.parseInt(record[0])))
+								.forEach(record->
+									record[index] = v.get(Integer.parseInt(record[0]))
+								);
+			
+		});
 		
 	}
 	
