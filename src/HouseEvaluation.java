@@ -227,7 +227,7 @@ public class HouseEvaluation {
 					if(whoIsNA.get(fields[j])!=null)
 					{
 						ArrayList<Integer> naIndex=new ArrayList<Integer>();
-						naIndex=whoIsNA.get(fields[j]);
+						naIndex.addAll(whoIsNA.get(fields[j]));
 						naIndex.add(j);
 						whoIsNA.put(fields[j],naIndex);
 					}
