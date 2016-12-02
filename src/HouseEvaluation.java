@@ -81,9 +81,9 @@ public class HouseEvaluation {
 					for(;i<fields.length-1;i++);
 						if(fields[i].equals(fieldName)) break;
 					int index = i;
-					ArrayList<Double> values = trains.parallelStream()
-					   		   						 .map(train->Double.parseDouble(train[index]))
-					   		   						 .collect(Collectors.toCollection(ArrayList::new));
+					ArrayList<Double> values = trains_num.parallelStream()
+					   		   						 	 .map(train->Double.parseDouble(train[index]))
+					   		   						 	 .collect(Collectors.toCollection(ArrayList::new));
 					avgBySection = groupByAvg(fieldName,values);
 				}
 				
