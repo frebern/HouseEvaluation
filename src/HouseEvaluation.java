@@ -189,7 +189,7 @@ public class HouseEvaluation {
 				if(fields[i].equals(fieldName))
 					index=i;
 			for(String[] line:table){
-				// 순서가 바뀔 row -> temp
+//				 순서가 바뀔 row -> temp
 				String[] temp = new String[line.length];
 				for(i=0;i<line.length;i++){
 					if(i!=index) temp[i]=line[i]; // 바꿀 index를 만날때까지 그냥 복사
@@ -210,7 +210,7 @@ public class HouseEvaluation {
 	//테이블을 na_IDs 인놈들과 아닌놈들로 나눕니다. ArrayList<String[]> trains_num과 ArrayList<String[]> tests_num.
 	private void seperateTables(ArrayList<String[]> table, ArrayList<Integer> na_IDs) {
 		for(String[] line:table){
-			if(na_IDs.contains(line[0])) tests_num.add(line);
+			if(na_IDs.contains(Integer.valueOf(line[0]))) tests_num.add(line);
 			else trains_num.add(line);
 		}
 		
