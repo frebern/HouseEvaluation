@@ -197,11 +197,18 @@ public class HouseEvaluation {
 						temp[temp.length-1] = line[i];
 						i++;
 						// i를 1올리고 남은 아이템을 한칸씩 밀려서 추가. 맨뒤로 하나를 추가한 뒤므로 length-1번까지 수행한다.
-						for(;i<line.length-1;i++) temp[i-1] = line[i];
+						for(;i<line.length;i++) temp[i-1] = line[i];
 						// i가 충분히 올라갔겠지만 명시적으로 break.
 						break;
 					}
 				}
+
+//				System.out.print(line.length+"LINE: ");
+//				for(String s:line) System.out.print(s+",");
+//				System.out.println("");
+//				System.out.print(temp.length+"TEMP: ");
+//				for(String s:temp) System.out.print(s+",");
+//				System.out.println("");
 				table.set(table.indexOf(line), temp);	// 해당 line을 순서가 바뀐 temp로 교체
 			}
 			
@@ -273,7 +280,7 @@ public class HouseEvaluation {
 		avgBySection = new HashMap<>();
 		ranges.parallelStream()
 			  .map(range->{
-				  System.out.println("DEBUG:"+values);
+				  //System.out.println("DEBUG:"+values);
 				  return values.parallelStream()
 								.filter(range)
 								.mapToDouble(s->(double)s)

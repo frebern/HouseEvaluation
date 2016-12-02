@@ -26,8 +26,11 @@ public class NaiveBayesian implements Algorithm{
 	// 분자를 구하는 함수
 	private Double getNum(ArrayList<String[]> data, String find, int index, String c) {
 		double n=0.0;
-		for(String[] line:data)
+		for(String[] line:data){
+			//for(String s:line) System.out.print(s+", ");
+			//System.out.println("");
 			if ((line[line.length-1].equals(c))&&(line[index].equals(find))) n++;
+		}
 		
 		return n;
 	}
