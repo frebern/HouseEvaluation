@@ -57,6 +57,8 @@ public class HouseEvaluation {
 			//각 NA 필드에 대해서.
 			for(String fieldName : naFields){
 				//현재 뉴메릭한 통합테이블을 trains_num과 tests_num으로 나눕니다.
+				//System.out.println("\nKey:"+fieldName+",Values:"+whoIsNA.get(fieldName));
+				
 				seperateTables(table, whoIsNA.get(fieldName));
 				
 				//딥카피 합니다.
@@ -228,13 +230,13 @@ public class HouseEvaluation {
 					{
 						ArrayList<Integer> naIndex=new ArrayList<Integer>();
 						naIndex.addAll(whoIsNA.get(fields[j]));
-						naIndex.add(j);
+						naIndex.add(Integer.parseInt(table.get(i)[0]));
 						whoIsNA.put(fields[j],naIndex);
 					}
 					else
 					{
 						ArrayList<Integer> naIndex=new ArrayList<Integer>();
-						naIndex.add(j);
+						naIndex.add(Integer.parseInt(table.get(i)[0]));
 						whoIsNA.put(fields[j],naIndex);
 					}
 				}
