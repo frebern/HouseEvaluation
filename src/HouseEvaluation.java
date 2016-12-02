@@ -113,13 +113,19 @@ public class HouseEvaluation {
 				results.put(fieldName, new_result);
 				
 			}
-			
 			//바뀐 결과들을 table에 반영합니다.
 			reflectResults(table, results);
-			System.out.println();
 			
 		}while(!isConverge(table_old, table)); //수렴하지 않으면 계속 돌립니다.
 	
+		/*for(int i=0;i<table.size();i++)
+		{
+			for(int j=0;j<table.get(i).length;j++)
+			{
+				System.out.print(table.get(i)[j]+" ");
+			}
+			System.out.println();
+		}*/
 		Writer.getInstance().writeNonNaTable("train_non_na.csv",table,fields);
 		
 	}
@@ -171,27 +177,18 @@ public class HouseEvaluation {
 	//results에는 Prediction으로 나온 결과들이 <ID, Result> 페어로 들어있는데, key는 해당 필드명입니다.
 	//originTable에 results를 한번에 반영합니다.
 	private void reflectResults(ArrayList<String[]> originTable, HashMap<String, HashMap<Integer, String>> results) {
-		int i,index=0;
-		for(String field:results.keySet()){
-			for(i=0;i<fields.length;i++){
-				if(fields[i].equals(field)) index=i;
-			}
-			HashMap<Integer, String> data = results.get(field);
-			for(Integer id:data.keySet()){
-				for(String[] line: originTable){
-					if(Integer.valueOf(line[0])==id){
-						String[] temp = new String[line.length];
-						for(i=0;i<temp.length;i++) {
-							if(i==index) temp[i] = data.get(id);
-							else temp[i] = line[i];
-						}
-//						System.out.println("TEMP");
-//						for(String s:temp) System.out.print(s+",");
-//						System.out.println("LINE");
-//						for(String s:line) System.out.print(s+",");
-						originTable.set(originTable.indexOf(line), temp);
+
+		for(int i=0;i<fields.length;i++)
+		{
+			if(results.get(fields[i])!=null)
+			{
+				for(int j=0;j<originTable.size();j++)
+				{
+					if(results.get(fields[i]).get(j)!=null)
+					{
+						originTable.get(j)[i]=results.get(fields[i]).get(j);
+						
 					}
-					else continue;
 				}
 			}
 		}
