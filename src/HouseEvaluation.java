@@ -70,6 +70,8 @@ public class HouseEvaluation {
 				convertData(trains_cat,tests_cat);
 				
 				//trains_cat과 tests_cat의 해당 컬럼을 맨 뒤로 밀어줍니다.
+				columnToClass(fieldName, trains_num);
+				columnToClass(fieldName, tests_num);
 				columnToClass(fieldName, trains_cat);
 				columnToClass(fieldName, tests_cat);
 				
@@ -77,12 +79,14 @@ public class HouseEvaluation {
 				boolean isCat = !isNumericField(fieldName);
 				if(!isCat){
 					/* 캡슐화 필요. */
-					int i=0;
-					for(;i<fields.length-1;i++);
-						if(fields[i].equals(fieldName)) break;
-					int index = i;
+//					System.out.println("DEBUG:");
+//					trains_num.forEach(train->{
+//						for(String word:train)
+//							System.out.print(word+" ");
+//						System.out.println();
+//					});
 					ArrayList<Double> values = trains_num.parallelStream()
-					   		   						 	 .map(train->Double.parseDouble(train[index]))
+					   		   						 	 .map(train->Double.parseDouble(train[train.length-1]))
 					   		   						 	 .collect(Collectors.toCollection(ArrayList::new));
 					avgBySection = groupByAvg(fieldName,values);
 				}
@@ -266,11 +270,14 @@ public class HouseEvaluation {
 		ArrayList<Predicate<Double>> ranges = DomainConvertor.getInstance().getDefinition(fieldName).ranges;
 		avgBySection = new HashMap<>();
 		ranges.parallelStream()
-			  .map(range->values.parallelStream()
+			  .map(range->{
+				  System.out.println("DEBUG:"+values);
+				  return values.parallelStream()
 								.filter(range)
 								.mapToDouble(s->(double)s)
 								.average()
-								.getAsDouble()
+								.getAsDouble();
+			  }
 			  )
 			  .forEach(avg->{
 				  String key = DomainConvertor.getInstance().getCategory(fieldName, avg+"");
