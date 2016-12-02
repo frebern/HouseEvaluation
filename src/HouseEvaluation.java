@@ -34,6 +34,7 @@ public class HouseEvaluation {
 	ArrayList<String[]> table_old = new ArrayList<>();
 	
 	public HouseEvaluation(){
+		int count=0;
 		
 		//1. 최초 트레이닝/테스트/카테고리 데이터를 읽고 저장합니다.
 		/* Reader에서 읽어오는 trains와 tests는 trains.csv와 test.csv입니다.
@@ -48,6 +49,7 @@ public class HouseEvaluation {
 		
 		//각 NA필드에대해서 어떤 ID가 NA인지 구합니다.
 		initWhoIsNA(table, naFields);
+		System.out.println(whoIsNA.get("LotFrontage"));
 		
 		int iteration = 1;
 		do{
@@ -64,10 +66,12 @@ public class HouseEvaluation {
 				
 				//현재 뉴메릭한 통합테이블을 trains_num과 tests_num으로 나눕니다.
 				//System.out.println("\nKey:"+fieldName+",Values:"+whoIsNA.get(fieldName));
+				copyTo(table,table_old);
+				
 				seperateTables(table, whoIsNA.get(fieldName));
 				
 				//딥카피 합니다.
-				copyTo(table,table_old);
+				
 				copyTo(trains_num,trains_cat);
 				copyTo(tests_num,tests_cat);
 				copyTo(trains_num,trains_next);
@@ -115,6 +119,15 @@ public class HouseEvaluation {
 			}
 			//바뀐 결과들을 table에 반영합니다.
 			reflectResults(table, results);
+			count++;
+			if(count==20)
+			{
+				Writer.getInstance().writeNonNaTable("train_non_na.csv",table,fields);
+			}
+			if(count==21)
+			{
+				break;
+			}
 			
 		}while(!isConverge(table_old, table)); //수렴하지 않으면 계속 돌립니다.
 	
@@ -126,7 +139,7 @@ public class HouseEvaluation {
 			}
 			System.out.println();
 		}*/
-		Writer.getInstance().writeNonNaTable("train_non_na.csv",table,fields);
+		Writer.getInstance().writeNonNaTable("train_non_na1.csv",table,fields);
 		
 	}
 	
@@ -187,7 +200,6 @@ public class HouseEvaluation {
 					if(results.get(fields[i]).get(j)!=null)
 					{
 						originTable.get(j)[i]=results.get(fields[i]).get(j);
-						
 					}
 				}
 			}
