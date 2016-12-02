@@ -93,7 +93,7 @@ public class HouseEvaluation {
 			
 		}while(!isConverge(table_old, table)); //수렴하지 않으면 계속 돌립니다.
 	
-		Writer.getInstance().writeNonNaTable("train_non_na.csv",table);
+		Writer.getInstance().writeNonNaTable("train_non_na.csv",table,fields);
 		
 	}
 	

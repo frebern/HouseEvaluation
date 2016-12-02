@@ -87,8 +87,30 @@ public class Writer {
 		return true;
 	}
 
-	public void writeNonNaTable(String filename, ArrayList<String[]> table) {
-		// TODO Auto-generated method stub
-		
+	public boolean writeNonNaTable(String filename, ArrayList<String[]> table, String[] fields) {
+		final String LINE_SEPARATOR = System.getProperty("line.separator");
+		try{
+			FileWriter fw = new FileWriter(new File(filename), false);
+			fw.write(fields[0]);
+			for(int i=1;i<fields.length;i++){
+				fw.write(",");
+				fw.write(fields[i]);
+			}
+			fw.write(LINE_SEPARATOR);
+			
+			for(String[] record:table){
+				fw.write(record[0]);
+				for(int i=1;i<record.length;i++){
+					fw.write(",");
+					fw.write(record[i]);
+				}
+				fw.write(LINE_SEPARATOR);
+			}
+			
+		}catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 }
