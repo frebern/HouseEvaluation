@@ -15,14 +15,14 @@ public class HouseEvaluation {
 	private ArrayList<Double> salePrices;
 	private HashMap<String,Double> avgBySection;
 	
-	private ArrayList<String[]> trains_num;
-	private ArrayList<String[]> tests_num;
+	private ArrayList<String[]> trains_num = new ArrayList<>();
+	private ArrayList<String[]> tests_num = new ArrayList<>();
 	
-	private ArrayList<String[]> trains_cat;
-	private ArrayList<String[]> tests_cat;
+	private ArrayList<String[]> trains_cat = new ArrayList<>();
+	private ArrayList<String[]> tests_cat = new ArrayList<>();
 	
-	private ArrayList<String[]> trains_next;
-	private ArrayList<String[]> tests_next;
+	private ArrayList<String[]> trains_next = new ArrayList<>();
+	private ArrayList<String[]> tests_next = new ArrayList<>();
 	
 	private ArrayList<String> naFields = new ArrayList<>();
 	
@@ -51,8 +51,8 @@ public class HouseEvaluation {
 		
 		do{
 			
-			//결과를 클리어 합니다.
-			results.clear();
+			//결과와 중간에 사용한 어레이리스트 모두 클리어 합니다.
+			clearAll();
 			
 			//각 NA 필드에 대해서.
 			for(String fieldName : naFields){
@@ -98,6 +98,17 @@ public class HouseEvaluation {
 	}
 	
 	
+	private void clearAll() {
+		results.clear();
+		trains_num.clear();
+		trains_cat.clear();
+		trains_next.clear();
+		tests_num.clear();
+		tests_cat.clear();
+		tests_next.clear();
+	}
+
+
 	//from에서 to로 Deep Copy합니다.
 	private void copyTo(ArrayList<String[]> from, ArrayList<String[]> to) {
 		to.clear();
