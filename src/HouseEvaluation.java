@@ -31,7 +31,7 @@ public class HouseEvaluation {
 	//HashMap<FieldName:String, Result:HashMap<ID,Result>>
 	private HashMap<String,HashMap<Integer,String>> results = new HashMap<>();
 	
-	ArrayList<String[]> table_old;
+	ArrayList<String[]> table_old = new ArrayList<>();
 	
 	public HouseEvaluation(){
 		
