@@ -39,7 +39,7 @@ public class HouseEvaluation {
 		System.out.println("Done!");
 		
 		//4. 결과를 파일로 씁니다. output.svc에 써집니다.
-		writeResult(algorithm.getPredictions());
+		writeResult(algorithm.getProbabilities());
 		System.out.println("Time Elapsed: "+(System.currentTimeMillis()-start)/1000.0+"sec");
 		
 		
