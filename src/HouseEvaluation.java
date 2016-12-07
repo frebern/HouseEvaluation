@@ -45,6 +45,27 @@ public class HouseEvaluation {
 		
 	}
 	
+	// train을 절반씩 나누며 각각에 대한 확률을 구하고 recursive하게 수행한다.
+	private double Recursion(ArrayList<String[]> trains_num, String[] test, double beforeProb){
+		ArrayList<String[]> trains_cat = new ArrayList<>();
+		double upperProb, lowerProb;
+		//toCat(trains_num, trains_cat);
+		
+		Algorithm algorithm = NaiveBayesian.getInstance();
+		//algorithm.readData(trains_cat, test);
+		//algorithms.runAlgorithm();
+		upperProb = algorithm.getPredictions().get("upper");
+		lowerProb = algorithm.getPredictions().get("lower");
+		
+		
+		
+		
+		return 0.0;
+	}
+	
+	private boolean StoppingCriteria(ArrayList<String[]> trains_cat, double upperProb, double lowerProb){
+		if(Math.max(upperProb, lowerProb)>0.7) return true;
+	}
 	
 	//뉴메릭컬한 SalePrice를 카테고리컬하게 변환하기 전에 미리 빼돌려놓습니다.
 	private ArrayList<Double> saveSalePrices(){

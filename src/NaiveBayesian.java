@@ -69,7 +69,7 @@ public class NaiveBayesian implements Algorithm{
 				double classCount = classCounts.get(key);
 				double smoothing = (classCount+1)/(total+1);
 				//이부분 +1로 스무딩할지 +(분모/전체)로 스무딩 할지는 직접 결과를 확인해 봐야 알듯. 하지만 아래에 분자도 (분모/전체)로 스무딩하므로 아마 후자가 맞을듯.
-				classCount+=smoothing;
+				classCount+=1;
 				
 				// 우선 곱할 수들을 v에 넣어줌. i=0은 id이므로 하지않음, i=test.length-1의 경우에는 현재 test에 클래스까지 들어가 있으므로 스킵.
 				ArrayList<Double> tmp = new ArrayList<>();
