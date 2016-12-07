@@ -34,7 +34,7 @@ public class HouseEvaluation {
 	int cnt=0;
 	// train을 절반씩 나누며 각각에 대한 확률을 구하고 recursive하게 수행한다.
 	private double recursion(ArrayList<String[]> trains_num, String[] test, double beforeProb){
-		System.out.println("Call #"+cnt++);
+//		System.out.println("Call #"+cnt++);
 		ArrayList<String[]> trains_upper = new ArrayList<>();
 		ArrayList<String[]> trains_lower = new ArrayList<>();
 		ArrayList<String[]> trains_cat = new ArrayList<>();
@@ -44,8 +44,14 @@ public class HouseEvaluation {
 		Algorithm algorithm = NaiveBayesian.getInstance();
 		algorithm.readData(trains_cat, test);
 		algorithm.runAlgorithm();
-		upperProb = algorithm.getProbabilities().get("upper");
-		lowerProb = algorithm.getProbabilities().get("lower");
+		
+		
+		HashMap<String,Double> probabilities = algorithm.getProbabilities();
+		if(probabilities.keySet().size()==1)
+			return average(trains_num)*beforeProb;
+		
+		upperProb = probabilities.get("upper");
+		lowerProb = probabilities.get("lower");
 		
 		if(stoppingCriteria(trains_upper, trains_lower, upperProb, lowerProb))
 			return (average(trains_upper)*upperProb + average(trains_lower)*lowerProb) * beforeProb;
@@ -69,14 +75,22 @@ public class HouseEvaluation {
 
 	// Recursion method의 중단조건. 두 확률중 한쪽이 일정확률(0.7)을 넘거나, 남은 trains의 size가 일정 개수 이하일 시 true return.
 	private boolean stoppingCriteria(ArrayList<String[]> trains_upper, ArrayList<String[]> trains_lower, double upperProb, double lowerProb){
-		if(Math.max(upperProb, lowerProb)>0.7) return true;
-		else if(Math.min(trains_upper.size(), trains_lower.size()) <= 1) return true;
-		else return false;
+//		if(Math.max(upperProb, lowerProb)>0.7) return true;
+//		if(Math.min(trains_upper.size(), trains_lower.size()) <= 1) return true;
+//		else return false;
+		
+		return Math.min(trains_upper.size(), trains_lower.size()) <= 2;
 	}
 	
 	// trains_num의 salesPrice로 sorting하고 절반씩 trains_upper, trains_lower에 add한다.
 	private void divide(ArrayList<String[]> trains_num, ArrayList<String[]> trains_cat, 
 			ArrayList<String[]> trains_upper, ArrayList<String[]> trains_lower){
+		
+		trains_cat.clear();
+		trains_upper.clear();
+		trains_lower.clear();
+		
+//		System.out.println("trains_num Size:"+trains_num.size());
 		
 		final int index = trains_num.get(0).length-1;
 		
@@ -103,6 +117,8 @@ public class HouseEvaluation {
 			double value = Double.parseDouble(train[index]);
 			train[index] = value<=pivot?"lower":"upper";
 		});
+		
+//		System.out.println("Pivot:"+pivot+",upperSize:"+trains_upper.size()+",lowerSize:"+trains_lower.size());
 		
 	}
 	
