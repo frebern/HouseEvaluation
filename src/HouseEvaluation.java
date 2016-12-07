@@ -86,8 +86,47 @@ public class HouseEvaluation {
 	}
 	
 	// trains_num의 salesPrice로 sorting하고 절반씩 trains_upper, trains_lower에 add한다.
-	private void divide(ArrayList<String[]> trains_num, ArrayList<String[]> trains_cat,ArrayList<String[]> trains_upper, ArrayList<String[]> trains_lower){
+	private void divide(ArrayList<String[]> trains_num, ArrayList<String[]> trains_cat, 
+			ArrayList<String[]> trains_upper, ArrayList<String[]> trains_lower){
 		
+		final int index = trains_num.get(0).length-1;
+		
+		trains_num.sort((t1,t2)->{
+			double sp1 = Double.parseDouble(t1[index]);
+			double sp2 = Double.parseDouble(t2[index]);
+			return Double.compare(sp1,sp2);
+		});
+		int midIndex = trains_num.size()/2;
+		double pivot = Double.parseDouble(trains_num.get(midIndex)[index]);
+		//trains_lower
+		trains_num.stream()
+				  .filter(train->Double.parseDouble(train[index])<=pivot)
+				  .forEach(train->trains_lower.add(train));
+		
+		//trains_upper
+		trains_num.stream()
+				  .filter(train->Double.parseDouble(train[index])>pivot)
+				  .forEach(train->trains_upper.add(train));
+		
+		copyTo(trains_num,trains_cat);
+		
+		trains_cat.stream().forEach(train->{
+			double value = Double.parseDouble(train[index]);
+			train[index] = value<=pivot?"lower":"upper";
+		});
+		
+	}
+	
+	//from에서 to로 Deep Copy합니다.
+	private void copyTo(ArrayList<String[]> from, ArrayList<String[]> to) {
+		to.clear();
+		from.forEach(origin->{
+			final int SIZE = origin.length;
+			String[] newOne = new String[SIZE];
+			for(int i=0;i<SIZE;i++)
+				newOne[i] = new StringBuilder(origin[i]).append("").toString().trim();
+			to.add(newOne);
+		});
 	}
 	
 	//뉴메릭컬한 SalePrice를 카테고리컬하게 변환하기 전에 미리 빼돌려놓습니다.
