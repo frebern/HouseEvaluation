@@ -25,7 +25,7 @@ public class HouseEvaluation {
 		//3. 어떤 알고리즘이든 상관없게끔 인터페이스 사용.
 		HashMap<Integer, Double> results = new HashMap<Integer, Double>();
 		int size = tests.size();
-		for(int i=0;i<size;i++){
+		for(int i=0;i<10;i++){
 			String[] test = tests.get(i);
 			long start = System.currentTimeMillis();
 			System.out.println("Test #"+i+" Start!");
@@ -51,13 +51,15 @@ public class HouseEvaluation {
 		double upperProb, lowerProb;
 		divide(trains_num, trains_cat, trains_upper, trains_lower);
 		
+		System.out.println("AFTER DIVIDE:"+trains_upper.size()+","+trains_lower.size());
+		
 		Algorithm algorithm = NaiveBayesian.getInstance();
 		algorithm.readData(trains_cat, test);
 		algorithm.runAlgorithm();
 		
 		
 		HashMap<String,Double> probabilities = algorithm.getProbabilities();
-		if(probabilities.keySet().size()<=1)
+		if(probabilities.keySet().size()<=2)
 			return average(trains_num)*beforeProb;
 		
 		upperProb = probabilities.get("upper");
@@ -96,9 +98,9 @@ public class HouseEvaluation {
 	private void divide(ArrayList<String[]> trains_num, ArrayList<String[]> trains_cat, 
 			ArrayList<String[]> trains_upper, ArrayList<String[]> trains_lower){
 		
-		trains_cat.clear();
-		trains_upper.clear();
-		trains_lower.clear();
+//		trains_cat.clear();
+//		trains_upper.clear();
+//		trains_lower.clear();
 //		
 ////		System.out.println("trains_num Size:"+trains_num.size());
 //		
@@ -130,43 +132,154 @@ public class HouseEvaluation {
 //		
 ////		System.out.println("Pivot:"+pivot+",upperSize:"+trains_upper.size()+",lowerSize:"+trains_lower.size());
 //		
+		
+		trains_cat.clear();
+		trains_upper.clear();
+		trains_lower.clear();
+		
+		copyTo(trains_num,trains_cat);
+		trains_cat.sort((t1,t2)->{
+			double sp1 = Double.parseDouble(t1[t1.length-1]);
+			double sp2 = Double.parseDouble(t2[t2.length-1]);
+			return Double.compare(sp1, sp2);
+		});
+		
+		int catSize = trains_cat.size();
+		//Convert To Category Class
+		for(int i=0;i<catSize;i++){
+//			System.out.println(('A'+i/((catSize/20)-1))+"");
+			trains_cat.get(i)[trains_cat.get(i).length-1] = (char)('A'+i/((catSize/20)-1))+"";
+		}
+		
+		
 		//현재 트레이닝 데이터에 대해서 Outlook, Windy, Humidity, Temperature의 IG를 각각 구합니다.
 		//이를 위해 먼저 트레이닝 데이터의 구조를 컬럼 축으로 변경합니다.
 		ArrayList<Double> informationGains = new ArrayList<>();
 		ArrayList<ArrayList<String>> attrs = new ArrayList<>();
 		
-		int numOfAttrs = trains_num.get(0).length;
+		int numOfAttrs = trains_cat.get(0).length;
 		for(int i=0;i<numOfAttrs;i++)
 			attrs.add(new ArrayList<>());
-		trains.forEach(train->{
-			for(int i=0;i<numOfAttrs;i++)
-				attrs.get(i).add(train[i]);
-		});
-		ArrayList<String> y = attrs.remove(numOfAttrs-1);
 		
-		//각 필드에 대해서 IG를 계산합니다.
-		attrs.forEach(attrValues->informationGains.add(calcIG(attrValues,y)));
+		for(int i=0;i<trains_cat.size();i++){
+			String[] train = trains_cat.get(i);
+			for(int j=0;j<numOfAttrs;j++)
+				attrs.get(j).add(train[j]);
+		}
 		
-		//nthMax(IG)를 찾기 위해 정렬합니다.
-		ArrayList<Double> tmp = new ArrayList<>();
-		tmp.addAll(informationGains);
-		tmp.sort(Comparator.reverseOrder());
-		int index;
+		attrs.remove(0);//Remove ID
+		numOfAttrs--;
+		ArrayList<String> y = attrs.remove(--numOfAttrs);//Class Pop
+		System.out.println(y);
 		
+		//각 필드에 대해서 IG를 계산하고, 그 기준을 정합니다.
+		ArrayList<String> criterias = new ArrayList<>();
+		for(int i=0;i<attrs.size();i++){
+			int criteriaIndex;
+			double ig;
+			criteriaIndex = 0;
+			ig = calcCategoricalIG(attrs.get(i), y);
+			
+			criterias.add(attrs.get(i).get(criteriaIndex));
+			informationGains.add(ig);
+		}
+		
+		System.out.println("IGs:"+informationGains);
+
+//		각 필드별 IG값 Print
+//		System.out.println("Information Gains:"+informationGains);
+		
+		//max IG를 찾습니다.
+		int index=0;
 		//trains의 첫 데이터를 기준으로 노드의 판단기준을 정합니다.
 		//예를들어 첫 라인이 {Sunny, Hot, High, Weak}이고 Outlook이 제일 IG가 높다면, 이 노드의 판단기준은  isSunny?가 됩니다.
+
+		//최대 IG값이 어느 필드인지 찾습니다.
+		index = informationGains.indexOf(informationGains.stream().max(Double::compareTo).get());
 		
-		//최대 IG값으로 분류기준 설정
-		index = informationGains.indexOf(tmp.get(0));
-		String pivot = trains.get(0)[index];
+		//그 필드의 분류기준을 찾습니다.
+		String criteria = criterias.get(index);
 		
-		//각 트레이닝 데이터에 대해, 분류 기준에 따라 Left와 Right로 분류하여 리턴합니다.
-		int in = index;
-		trains.forEach(train->{
-			boolean who = train[in].equals(pivot);
-//			result[i].add(train);
-			(who?trains_upper:trains_lower).add(train);
+		//그 필드가 카테고리컬하면 그대로 저장합니다.
+		final int in = index+1;
+		//해당 카테고리인지 아닌지에 따라 나눕니다.
+		trains_cat.forEach(train->{
+			
+			boolean isEqual = train[in].equals(criteria);
+			System.out.println(train[in]+","+criteria+",isEqual?:"+isEqual);
+			train[train.length-1] = isEqual?"lower":"upper";
+			ArrayList<String[]> ref = isEqual?trains_lower:trains_upper;
+			ref.add(train);
 		});
+		
+		System.out.println("lowerSize:"+trains_lower.size());
+		System.out.println("upperSize:"+trains_upper.size());
+		
+	}
+	
+	//1. 현재 trains에 대해서 Outlook, Windy, Humidity, Temperature의 IG를 각각 구한다.
+	//IG = H(Y|Outlook)
+	//   = - (P(X=S)H(Y|X=S) + P(X=O)H(Y|X=O) + P(X=R)H(Y|X=R))
+	//H(Y|X=S)
+	//= -(P(Y=yes|X=S)log2(P(Y=yes|X=S)) 
+	//     + P(Y=no|X=S)log2(P(Y=no|X=S)))
+	
+	private double calcCategoricalIG(ArrayList<String> attrValues, ArrayList<String> y) {
+		
+		//Yes No
+		TreeSet<String> classKeys = new TreeSet<>();
+		y.forEach(c->classKeys.add(c));
+		
+		//Sunny Rain Overcast
+		TreeSet<String> attrValueSet = new TreeSet<>();
+		attrValues.forEach(attr->attrValueSet.add(attr));
+		
+		//Foreach xi, Calculate P(X=xi)H(Y|X=xi)
+		DoubleStream entropys = attrValueSet.stream().mapToDouble(attrValue->{
+			
+			//H(Y|X=Math)
+			//attrValue = Sunny
+			//Yes: 3, No: 2
+			HashMap<String,Integer> classCounts = new HashMap<>();
+			for(int i=0;i<attrValues.size();i++){
+				if(attrValues.get(i).equals(attrValue)){
+					String c = y.get(i);
+					classCounts.put(c, classCounts.getOrDefault(c, 0)+1);
+				}
+			}
+			
+//			System.out.println("CC"+classCounts);
+			
+			Supplier<IntStream> classCountsStream = ()->classCounts.values().stream().mapToInt(a->a);
+			int size = classCountsStream.get().sum();
+			double entropy = classCountsStream.get().mapToDouble(classCount-> {
+				double p = (1.0 * classCount)/size;
+//				System.out.println("P:"+classCount+"/"+size);
+				return -1.0 * p * (Math.log(p) / Math.log(2)); // -P(Y|X=xi)log2(P(Y|X=xi))
+			}).sum();
+			
+			
+			double pX = (attrValues.stream()
+								   .filter(attr->attr.equals(attrValue))
+								   .count()*1.0)
+								   /attrValues.size();
+
+			return entropy * pX;
+		});
+
+		
+		double h = classKeys.stream().mapToDouble(key->{
+			double cnt = (double)(y.stream().filter(c->c.equals(key)).count());
+			return cnt/y.size();
+		}).sum();
+		
+		double sum = entropys.sum();
+//		System.out.println("H:"+h);
+//		System.out.println("Entropy: "+sum);
+		
+		double result = h-sum;
+
+		return result;
 	}
 	
 	//from에서 to로 Deep Copy합니다.
@@ -267,64 +380,6 @@ public class HouseEvaluation {
 			Writer.getInstance().devide(keys, values, field);
 		}
 	}
-	
-	//1. 현재 trains에 대해서 Outlook, Windy, Humidity, Temperature의 IG를 각각 구한다.
-	//IG = H(Y|Outlook)
-	//   = - (P(X=S)H(Y|X=S) + P(X=O)H(Y|X=O) + P(X=R)H(Y|X=R))
-	//H(Y|X=S)
-	//= -(P(Y=yes|X=S)log2(P(Y=yes|X=S)) 
-	//     + P(Y=no|X=S)log2(P(Y=no|X=S)))
-	
-	private double calcIG(ArrayList<String> attrValues, ArrayList<String> y) {
-		
-		//Yes No
-		TreeSet<String> classKeys = new TreeSet<>();
-		y.forEach(c->classKeys.add(c));
-		
-		//Sunny Rain Overcast
-		TreeSet<String> attrValueSet = new TreeSet<>();
-		attrValues.forEach(attr->attrValueSet.add(attr));
-		
-		//Foreach xi, Calculate P(X=xi)H(Y|X=xi)
-		DoubleStream entropys = attrValueSet.stream().mapToDouble(attrValue->{
-			
-			//H(Y|X=Math)
-			//attrValue = Sunny
-			//Yes: 3, No: 2
-			HashMap<String,Integer> classCounts = new HashMap<>();
-			for(int i=0;i<attrValues.size();i++){
-				if(attrValues.get(i).equals(attrValue)){
-					String c = y.get(i);
-					classCounts.put(c, classCounts.getOrDefault(c, 0)+1);
-				}
-			}
-			
-			Supplier<IntStream> classCountsStream = ()->classCounts.values().stream().mapToInt(a->a);
-			int size = classCountsStream.get().sum();
-			double entropy = classCountsStream.get().mapToDouble(classCount-> {
-				double p = (1.0 * classCount)/size;
-				return -1.0 * p * (Math.log(p) / Math.log(2)); // -P(Y|X=xi)log2(P(Y|X=xi))
-			}).sum();
-			
-			double pX = (attrValues.stream()
-								   .filter(attr->attr.equals(attrValue))
-								   .count()*1.0)
-								   /attrValues.size();
-
-			return entropy * pX;
-		});
-
-		
-		double h = classKeys.stream().mapToDouble(key->{
-			double cnt = (double)(y.stream().filter(c->c.equals(key)).count());
-			return cnt/y.size();
-		}).sum();
-		
-		double result = h-entropys.sum();
-
-		return result;
-	}
-	
 
 	public static void main(String[] args) {
 		long start = System.currentTimeMillis();
