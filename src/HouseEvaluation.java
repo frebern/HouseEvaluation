@@ -73,16 +73,15 @@ public class HouseEvaluation {
 	
 	// salesPrice의 평균을 구하는 메소드
 	private double average(ArrayList<String[]> trains) {
-		// TODO Auto-generated method stub
+		//trains.stream().map(train->Double.parseDouble(train[train.length-1])).average();
 		return 0;
 	}
 
 	// Recursion method의 중단조건. 두 확률중 한쪽이 일정확률(0.7)을 넘거나, 남은 trains의 size가 일정 개수 이하일 시 true return.
 	private boolean stoppingCriteria(ArrayList<String[]> trains_upper, ArrayList<String[]> trains_lower, double upperProb, double lowerProb){
 		if(Math.max(upperProb, lowerProb)>0.7) return true;
-		//else if
+		else if(Math.min(trains_upper.size(), trains_lower.size()) <= 1) return true;
 		else return false;
-		
 	}
 	
 	// trains_num의 salesPrice로 sorting하고 절반씩 trains_upper, trains_lower에 add한다.
