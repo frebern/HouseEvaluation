@@ -79,7 +79,7 @@ public class HouseEvaluation {
 //		if(Math.min(trains_upper.size(), trains_lower.size()) <= 1) return true;
 //		else return false;
 		
-		return Math.min(trains_upper.size(), trains_lower.size()) <= 2;
+		return Math.min(trains_upper.size(), trains_lower.size()) <= 1;
 	}
 	
 	// trains_num의 salesPrice로 sorting하고 절반씩 trains_upper, trains_lower에 add한다.
@@ -224,6 +224,7 @@ public class HouseEvaluation {
 
 	public static void main(String[] args) {
 		long start = System.currentTimeMillis();
+		System.out.println("Now Running...");
 		new HouseEvaluation();
 		System.out.println("Done!");
 		System.out.println("Time Elapsed: "+(System.currentTimeMillis()-start)/1000.0+"sec");

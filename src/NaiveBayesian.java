@@ -59,7 +59,7 @@ public class NaiveBayesian implements Algorithm{
 		*/
 		HashMap<String, Double> probs = new HashMap<String, Double>();
 		double sumOfProbs = 0.0;
-		System.out.println("values:"+classCounts.values());
+//		System.out.println("values:"+classCounts.values());
 		for(String key:classCounts.keySet()){
 			double prob = 1.0;
 			double classCount = classCounts.get(key);
