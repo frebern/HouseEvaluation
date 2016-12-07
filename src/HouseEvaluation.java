@@ -25,7 +25,7 @@ public class HouseEvaluation {
 		//3. 어떤 알고리즘이든 상관없게끔 인터페이스 사용.
 		HashMap<Integer, Double> results = new HashMap<Integer, Double>();
 		int size = tests.size();
-		for(int i=0;i<10;i++){
+		for(int i=0;i<100;i++){
 			String[] test = tests.get(i);
 			long start = System.currentTimeMillis();
 			System.out.println("Test #"+i+" Start!");
@@ -51,19 +51,24 @@ public class HouseEvaluation {
 		double upperProb, lowerProb;
 		divide(trains_num, trains_cat, trains_upper, trains_lower);
 		
-		System.out.println("AFTER DIVIDE:"+trains_upper.size()+","+trains_lower.size());
+		System.out.println("AFTER DIVIDE:"+trains_upper.size()+","+trains_lower.size()+","+trains_cat.size());
+		for(String[] train:trains_cat){
+			System.out.print(train[train.length-1]+",");
+		}
+		System.out.println();
 		
 		Algorithm algorithm = NaiveBayesian.getInstance();
 		algorithm.readData(trains_cat, test);
 		algorithm.runAlgorithm();
 		
-		
 		HashMap<String,Double> probabilities = algorithm.getProbabilities();
-		if(probabilities.keySet().size()<=2)
+		if(probabilities.keySet().size()<=1)
 			return average(trains_num)*beforeProb;
 		
 		upperProb = probabilities.get("upper");
 		lowerProb = probabilities.get("lower");
+		
+		System.out.println("upperProb:"+upperProb+",lowerProb:"+lowerProb);
 		
 		if(stoppingCriteria(trains_upper, trains_lower, upperProb, lowerProb))
 			return (average(trains_upper)*upperProb + average(trains_lower)*lowerProb) * beforeProb;
@@ -91,7 +96,7 @@ public class HouseEvaluation {
 //		if(Math.min(trains_upper.size(), trains_lower.size()) <= 1) return true;
 //		else return false;
 		
-		return Math.min(trains_upper.size(), trains_lower.size()) <= 1;
+		return Math.max(trains_upper.size(), trains_lower.size()) <= 2;
 	}
 	
 	// trains_num의 salesPrice로 sorting하고 절반씩 trains_upper, trains_lower에 add한다.
@@ -137,18 +142,18 @@ public class HouseEvaluation {
 		trains_upper.clear();
 		trains_lower.clear();
 		
-		copyTo(trains_num,trains_cat);
-		trains_cat.sort((t1,t2)->{
+		trains_num.sort((t1,t2)->{
 			double sp1 = Double.parseDouble(t1[t1.length-1]);
 			double sp2 = Double.parseDouble(t2[t2.length-1]);
 			return Double.compare(sp1, sp2);
 		});
+		copyTo(trains_num,trains_cat);
 		
 		int catSize = trains_cat.size();
 		//Convert To Category Class
 		for(int i=0;i<catSize;i++){
 //			System.out.println(('A'+i/((catSize/20)-1))+"");
-			trains_cat.get(i)[trains_cat.get(i).length-1] = (char)('A'+i/((catSize/20)-1))+"";
+			trains_cat.get(i)[trains_cat.get(i).length-1] = (char)('A'+i/(catSize/20))+"";
 		}
 		
 		
@@ -203,14 +208,14 @@ public class HouseEvaluation {
 		//그 필드가 카테고리컬하면 그대로 저장합니다.
 		final int in = index+1;
 		//해당 카테고리인지 아닌지에 따라 나눕니다.
-		trains_cat.forEach(train->{
-			
-			boolean isEqual = train[in].equals(criteria);
-			System.out.println(train[in]+","+criteria+",isEqual?:"+isEqual);
-			train[train.length-1] = isEqual?"lower":"upper";
+		for(int i=0;i<trains_cat.size();i++){
+			String[] train_cat = trains_cat.get(i);
+			String[] train_num = trains_num.get(i);
+			boolean isEqual = train_cat[in].equals(criteria);
+			train_cat[train_cat.length-1] = isEqual?"lower":"upper";
 			ArrayList<String[]> ref = isEqual?trains_lower:trains_upper;
-			ref.add(train);
-		});
+			ref.add(train_num);
+		}
 		
 		System.out.println("lowerSize:"+trains_lower.size());
 		System.out.println("upperSize:"+trains_upper.size());
