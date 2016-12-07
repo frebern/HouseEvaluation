@@ -34,37 +34,60 @@ public class HouseEvaluation {
 		//3. 어떤 알고리즘이든 상관없게끔 인터페이스 사용.
 		System.out.print("Now Running... ");
 		Algorithm algorithm = NaiveBayesian.getInstance();
-		algorithm.readData(trains, tests, avgBySection);
+		//algorithm.readData(trains, tests, avgBySection);
 		algorithm.runAlgorithm();
 		System.out.println("Done!");
 		
 		//4. 결과를 파일로 씁니다. output.svc에 써집니다.
-		writeResult(algorithm.getPredictions());
+		//writeResult(algorithm.getProbabilities());
 		System.out.println("Time Elapsed: "+(System.currentTimeMillis()-start)/1000.0+"sec");
 		
 		
 	}
 	
 	// train을 절반씩 나누며 각각에 대한 확률을 구하고 recursive하게 수행한다.
-	private double Recursion(ArrayList<String[]> trains_num, String[] test, double beforeProb){
+	private double recursion(ArrayList<String[]> trains_num, String[] test, double beforeProb){
+		ArrayList<String[]> trains_upper = new ArrayList<>();
+		ArrayList<String[]> trains_lower = new ArrayList<>();
 		ArrayList<String[]> trains_cat = new ArrayList<>();
 		double upperProb, lowerProb;
-		//toCat(trains_num, trains_cat);
+		divide(trains_num, trains_cat, trains_upper, trains_lower);
 		
 		Algorithm algorithm = NaiveBayesian.getInstance();
 		//algorithm.readData(trains_cat, test);
 		//algorithms.runAlgorithm();
-		upperProb = algorithm.getPredictions().get("upper");
-		lowerProb = algorithm.getPredictions().get("lower");
+		upperProb = algorithm.getProbabilities().get("upper");
+		lowerProb = algorithm.getProbabilities().get("lower");
 		
+		if(stoppingCriteria(trains_upper, trains_lower, upperProb, lowerProb))
+			return (average(trains_upper)*upperProb + average(trains_lower)*lowerProb) * beforeProb;
+		else{
+			ArrayList<String[]> maxSet = upperProb>lowerProb?trains_upper:trains_lower;
+			ArrayList<String[]> minSet = upperProb<=lowerProb?trains_upper:trains_lower;
+			double maxProb = Math.max(upperProb, lowerProb);
+			double minProb = Math.min(upperProb, lowerProb);
+			return recursion(maxSet, test, maxProb*beforeProb) + average(minSet)*minProb*beforeProb;
+		}
 		
-		
-		
-		return 0.0;
 	}
 	
-	private boolean StoppingCriteria(ArrayList<String[]> trains_cat, double upperProb, double lowerProb){
+	// salesPrice의 평균을 구하는 메소드
+	private double average(ArrayList<String[]> trains) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	// Recursion method의 중단조건. 두 확률중 한쪽이 일정확률(0.7)을 넘거나, 남은 trains의 size가 일정 개수 이하일 시 true return.
+	private boolean stoppingCriteria(ArrayList<String[]> trains_upper, ArrayList<String[]> trains_lower, double upperProb, double lowerProb){
 		if(Math.max(upperProb, lowerProb)>0.7) return true;
+		//else if
+		else return false;
+		
+	}
+	
+	// trains_num의 salesPrice로 sorting하고 절반씩 trains_upper, trains_lower에 add한다.
+	private void divide(ArrayList<String[]> trains_num, ArrayList<String[]> trains_cat,ArrayList<String[]> trains_upper, ArrayList<String[]> trains_lower){
+		
 	}
 	
 	//뉴메릭컬한 SalePrice를 카테고리컬하게 변환하기 전에 미리 빼돌려놓습니다.
